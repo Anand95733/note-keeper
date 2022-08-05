@@ -1,13 +1,28 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
 import Note from "./Note";
-import EditInput from "./editInput";
 import CreateArea from "./CreateArea";
+import Button from "@mui/material/Button";
 
 function App() {
   const [getNotes, setGetNotes] = useState([]);
+  const [onEdit, setOnEdit] = useState(false);
+  const [titlee, setTitlee] = useState("");
+  const [contentt, setContentt] = useState("");
+  const [idValue, setIdValue] = useState("");
+
+  function handleTitle(props) {
+    const propTitle = props.target.value;
+    setTitlee(propTitle);
+  }
+
+  function handleContent(props) {
+    const propContent = props.target.value;
+    setContentt(propContent);
+  }
 
   useEffect(() => {
     Axios.get("http://localhost:4000/getNotes").then((res) => {
@@ -54,14 +69,14 @@ function App() {
       .catch((error) => {
         console.log(error);
       });
+    setOnEdit(false);
   }
 
-  function updateNote(id) {
-    console.log("update id: " + id);
+  function updateNote() {
     Axios.put("http://localhost:4000/updateNote", {
-      _id: id,
-      title: "lorem ipsum",
-      content: "lorem ipsum",
+      _id: idValue,
+      title: titlee,
+      content: contentt,
     })
       .then(() => {
         console.log("updated note!!");
@@ -69,6 +84,13 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
+
+    setOnEdit(false);
+  }
+
+  function editbutton(id) {
+    setIdValue(id);
+    setOnEdit(true);
   }
 
   return (
@@ -84,10 +106,43 @@ function App() {
             title={notes.title}
             content={notes.content}
             onDelete={deleteNote}
-            onEdit={updateNote}
+            onEdit={editbutton}
           />
         );
       })}
+
+      {onEdit === true ? (
+        <div className="form-div">
+          <form className="form-class-div">
+            <input
+              className="title-input"
+              type="text"
+              placeholder="title"
+              onChange={handleTitle}
+              value={titlee}
+              required
+            />
+            <textarea
+              className="title-input"
+              type="text"
+              placeholder="content"
+              onChange={handleContent}
+              value={contentt}
+              required
+            />
+
+            <Button
+              variant="contained"
+              sx={{ color: "white", backgroundColor: "black" }}
+              onClick={updateNote}
+            >
+              Save
+            </Button>
+          </form>
+        </div>
+      ) : (
+        ""
+      )}
 
       <Footer />
     </div>
